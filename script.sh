@@ -1,5 +1,6 @@
 MAINBRANCH="main"
 EXTENTIONS=("_current" "_dev")
+ALL_BRANCHES=$(git show-ref --heads | sed 's/.*refs\/heads\///')
 
 is_merged_to_master() {
     for merged_branch in $(git for-each-ref --merged=origin/$MAINBRANCH --format="%(refname:short)" refs/heads/); do
@@ -12,23 +13,38 @@ is_merged_to_master() {
 	return
 }
 
-for branch in $(git show-ref --heads | sed 's/.*refs\/heads\///'); do
+for branch in $ALL_BRANCHES; do
  if [[ "$branch" != "$MAINBRANCH" ]] 
  then
     if is_merged_to_master "$branch" 
 	then
-		echo "$branch: OK"
+		echo "$branch: Merged"
 	else 
 		echo "Error: $branch is not merged"
-		#exit 1
+		exit 1
  	fi
-	echo "All branches are merged to master!"
+ fi
+done
+
+echo "All branches are merged to master!"
+
+for checked_branch in $ALL_BRANCHES; do
+ if [[ "$checked_branch" != "$MAINBRANCH" ]] 
+ then
+	is_task_branch_deleted=false
 	for extention in ${EXTENTIONS[@]}; do
-		if [ "$branch" == *"$extention"* ]; 
+		if [[ "$checked_branch" == *"$extention"* ]]; 
 		then
-			#git branch -d $branch
-			echo "$branch successfully deleted!"
+			git branch -d $branch
+			echo "$checked_branch successfully deleted!"
+			if ! $is_task_branch_deleted 
+			then
+				end_index=$((${#checked_branch}-${#extention}))
+				git branch -d ${checked_branch:0:$end_index}
+				echo "${checked_branch:0:$end_index} successfully deleted!"
+			fi 		
 		fi
+		is_task_branch_deleted=true
 	done
  fi
 done
