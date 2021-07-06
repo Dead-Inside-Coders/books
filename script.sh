@@ -36,12 +36,10 @@ for checked_branch in $ALL_BRANCHES; do
 		if [[ "$checked_branch" == *"$extention"* ]]; 
 		then
 			git branch -d $checked_branch
-			echo "$checked_branch successfully deleted!"
 			if ! $is_task_branch_deleted 
 			then
 				end_index=$((${#checked_branch}-${#extention}))
 				git branch -d ${checked_branch:0:$end_index}
-				echo "${checked_branch:0:$end_index} successfully deleted!"
 			fi 		
 		fi
 		is_task_branch_deleted=true
