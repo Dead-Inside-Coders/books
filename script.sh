@@ -35,7 +35,7 @@ for checked_branch in $ALL_BRANCHES; do
 	for extention in ${EXTENTIONS[@]}; do
 		if [[ "$checked_branch" == *"$extention"* ]]; 
 		then
-			git branch -d $branch
+			git branch -d $checked_branch
 			echo "$checked_branch successfully deleted!"
 			if ! $is_task_branch_deleted 
 			then
