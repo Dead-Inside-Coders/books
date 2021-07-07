@@ -24,11 +24,13 @@ for branch in $ALL_BRANCHES; do
 		merged_branches+=($branch)
 	else 
 		echo "Error: $branch is not merged"
+		
  	fi
  fi
 done
 
-for checked_branch in $merged_branches; do
+
+for checked_branch in ${merged_branches[@]}; do
 	is_task_branch_deleted=false
 	for extention in ${EXTENTIONS[@]}; do
 		if [[ "$checked_branch" == *"$extention"* ]]; 
