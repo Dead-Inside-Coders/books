@@ -2,6 +2,8 @@ MAINBRANCH="main"
 EXTENTIONS=("_current" "_dev")
 ALL_BRANCHES=$(git show-ref --heads | sed 's/.*refs\/heads\///')
 
+merged_branches=()
+
 is_merged_to_master() {
     for merged_branch in $(git for-each-ref --merged=origin/$MAINBRANCH --format="%(refname:short)" refs/heads/); do
 		if [[ "$merged_branch" == "$1" ]]; then
@@ -19,18 +21,14 @@ for branch in $ALL_BRANCHES; do
     if is_merged_to_master "$branch" 
 	then
 		echo "$branch: Merged"
+		merged_branches+=($branch)
 	else 
 		echo "Error: $branch is not merged"
-		exit 1
  	fi
  fi
 done
 
-echo "All branches are merged to master!"
-
-for checked_branch in $ALL_BRANCHES; do
- if [[ "$checked_branch" != "$MAINBRANCH" ]] 
- then
+for checked_branch in $merged_branches; do
 	is_task_branch_deleted=false
 	for extention in ${EXTENTIONS[@]}; do
 		if [[ "$checked_branch" == *"$extention"* ]]; 
@@ -44,7 +42,6 @@ for checked_branch in $ALL_BRANCHES; do
 		fi
 		is_task_branch_deleted=true
 	done
- fi
 done
 read -p "Press Enter to continue ..." 
 
