@@ -1,9 +1,25 @@
+#
+# -r - delete remote branch
+# -d - debug mode
+#
+
 MAINBRANCH="main"
 EXTENTIONS=("_current" "_dev")
-REMOTE_DELETE_FLAG="-r"
+
+DELETE_REMOTE_MODE=false
+DEGUG_MODE=false
+
 ALL_BRANCHES=$(git show-ref --heads | sed 's/.*refs\/heads\///')
 
 merged_branches=()
+
+while getopts 'rd' flag; do
+	case ${flag} in
+	r) DELETE_REMOTE_MODE=true ;;
+	d) DEGUG_MODE=true ;;
+	esac
+done
+
 
 is_merged_to_master() {
     for merged_branch in $(git for-each-ref --merged=origin/$MAINBRANCH --format="%(refname:short)" refs/heads/); do
@@ -17,13 +33,21 @@ is_merged_to_master() {
 }
 
 delete_local_branch() {
-	echo "delete $1 locally!"
-	#git branch -d $1
+	if $DEGUG_MODE 
+	then
+		echo "delete $1 locally!"
+	else 
+		git branch -d $1
+	fi
 }
 
 delete_remote_branch() {
-	echo "delete $1 remotely!"
-	#git push origin --delete $1
+	if $DEGUG_MODE 
+	then
+		echo "delete $1 remotely!"
+	else 
+		git push origin --delete $1
+	fi
 }
 
 
@@ -45,8 +69,7 @@ for checked_branch in ${merged_branches[@]}; do
 	for extention in ${EXTENTIONS[@]}; do
 		if [[ "$checked_branch" == *"$extention"* ]]; 
 		then
-
-			if test "$1" = $REMOTE_DELETE_FLAG
+			if $DELETE_REMOTE_MODE
 			then
 				delete_local_branch $checked_branch
 				delete_remote_branch $checked_branch
@@ -58,7 +81,7 @@ for checked_branch in ${merged_branches[@]}; do
 			then
 				end_index=$((${#checked_branch}-${#extention}))
 
-				if test "$1" = $REMOTE_DELETE_FLAG
+				if $DELETE_REMOTE_MODE
 				then
 					if is_merged_to_master "${checked_branch:0:$end_index}" 
 					then
