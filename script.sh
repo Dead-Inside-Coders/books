@@ -35,7 +35,7 @@ for branch in $ALL_BRANCHES; do
 		echo "$branch: Merged"
 		merged_branches+=($branch)
 	else 
-		echo "Error: $branch is not merged"
+		echo "$branch is not merged"
  	fi 
  fi
 done
