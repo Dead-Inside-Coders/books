@@ -15,6 +15,17 @@ is_merged_to_master() {
 	return
 }
 
+delete_local_branch() {
+	echo "delete $1 locally!"
+	#git branch -d $1
+}
+
+delete_remote_branch() {
+	echo "delete $1 remotely!"
+	#git push origin --delete $1
+}
+
+
 for branch in $ALL_BRANCHES; do
  if [[ "$branch" != "$MAINBRANCH" ]] 
  then
@@ -24,7 +35,7 @@ for branch in $ALL_BRANCHES; do
 		merged_branches+=($branch)
 	else 
 		echo "Error: $branch is not merged"
- 	fi
+ 	fi 
  fi
 done
 
@@ -33,11 +44,26 @@ for checked_branch in ${merged_branches[@]}; do
 	for extention in ${EXTENTIONS[@]}; do
 		if [[ "$checked_branch" == *"$extention"* ]]; 
 		then
-			git branch -d $checked_branch
+
+			if test "$1" = "-r" 
+			then
+				delete_local_branch $checked_branch
+				delete_remote_branch $checked_branch
+			else
+				delete_local_branch $checked_branch
+			fi
+			
 			if ! $is_task_branch_deleted 
 			then
 				end_index=$((${#checked_branch}-${#extention}))
-				git branch -d ${checked_branch:0:$end_index}
+
+				if test "$1" = "-r" 
+				then
+					delete_local_branch ${checked_branch:0:$end_index}
+					delete_remote_branch ${checked_branch:0:$end_index}
+				else
+					delete_local_branch ${checked_branch:0:$end_index}
+				fi
 			fi 		
 		fi
 		is_task_branch_deleted=true
