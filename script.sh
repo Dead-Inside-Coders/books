@@ -1,5 +1,6 @@
 MAINBRANCH="main"
 EXTENTIONS=("_current" "_dev")
+REMOTE_DELETE_FLAG="-r"
 ALL_BRANCHES=$(git show-ref --heads | sed 's/.*refs\/heads\///')
 
 merged_branches=()
@@ -45,7 +46,7 @@ for checked_branch in ${merged_branches[@]}; do
 		if [[ "$checked_branch" == *"$extention"* ]]; 
 		then
 
-			if test "$1" = "-r" 
+			if test "$1" = $REMOTE_DELETE_FLAG
 			then
 				delete_local_branch $checked_branch
 				delete_remote_branch $checked_branch
@@ -57,12 +58,18 @@ for checked_branch in ${merged_branches[@]}; do
 			then
 				end_index=$((${#checked_branch}-${#extention}))
 
-				if test "$1" = "-r" 
+				if test "$1" = $REMOTE_DELETE_FLAG
 				then
-					delete_local_branch ${checked_branch:0:$end_index}
-					delete_remote_branch ${checked_branch:0:$end_index}
+					if is_merged_to_master "${checked_branch:0:$end_index}" 
+					then
+						delete_local_branch ${checked_branch:0:$end_index}
+						delete_remote_branch ${checked_branch:0:$end_index}
+					fi 	
 				else
-					delete_local_branch ${checked_branch:0:$end_index}
+					if is_merged_to_master "${checked_branch:0:$end_index}" 
+					then
+						delete_local_branch ${checked_branch:0:$end_index}
+					fi
 				fi
 			fi 		
 		fi
